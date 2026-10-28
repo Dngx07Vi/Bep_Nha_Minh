@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sổ tay công thức nấu ăn: thêm, sửa, xóa, tìm kiếm và lưu món yêu thích.">
+  <title>Bếp Nhà Mình - Sổ tay công thức nấu ăn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <div class="logo">🍳 Bếp Nhà Mình</div>
+      <div class="header-actions">
+        <button id="btnRandom" class="btn btn-outline">🎲 Hôm nay ăn gì?</button>
+        <button id="btnAdd" class="btn btn-primary">+ Thêm công thức</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Sổ tay công thức nấu ăn</h1>
+      <p>Lưu lại những món ngon của gia đình bạn, tìm kiếm nhanh và nấu theo số người ăn.</p>
+    </section>
+
+    <!-- Thống kê -->
+    <section class="stats">
+      <div class="stat-card">
+        <span class="stat-number" id="statTotal">0</span>
+        <span class="stat-label">Công thức</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statFav">0</span>
+        <span class="stat-label">Yêu thích</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statAvg">0</span>
+        <span class="stat-label">Phút nấu trung bình</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statQuick">0</span>
+        <span class="stat-label">Món nhanh (≤ 30 phút)</span>
+      </div>
+    </section>
+
+    <!-- Thanh công cụ: tìm kiếm, lọc, sắp xếp -->
+    <section class="toolbar">
+      <input type="text" id="searchInput" placeholder="🔍 Tìm theo tên món hoặc nguyên liệu...">
+      <select id="filterCategory">
+        <option value="">Tất cả loại món</option>
+        <option value="Món chính">Món chính</option>
+        <option value="Món phụ">Món phụ</option>
+        <option value="Tráng miệng">Tráng miệng</option>
+        <option value="Đồ uống">Đồ uống</option>
+      </select>
+      <select id="sortSelect">
+        <option value="newest">Mới nhất</option>
+        <option value="name">Tên A → Z</option>
+        <option value="timeAsc">Thời gian tăng dần</option>
+        <option value="timeDesc">Thời gian giảm dần</option>
+      </select>
+      <label class="checkbox">
+        <input type="checkbox" id="favOnly"> Chỉ món yêu thích
+      </label>
+      <button id="btnReset" class="btn btn-light">Xóa bộ lọc</button>
+    </section>
+
+    <p class="result-count" id="resultCount"></p>
+
+    <!-- Danh sách công thức -->
+    <section id="recipeList" class="recipe-grid"></section>
+
+    <div id="emptyState" class="empty hidden">
+      <div class="empty-icon">🥄</div>
+      <p>Không tìm thấy công thức nào phù hợp.</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 Bếp Nhà Mình · Dữ liệu được lưu trên trình duyệt của bạn</p>
+  </footer>
+
+  <!-- Modal: Form thêm / sửa -->
+  <div id="formModal" class="modal hidden">
+    <div class="modal-box">
+      <button class="modal-close" data-close>&times;</button>
+      <h2 id="formTitle">Thêm công thức</h2>
+
+      <form id="recipeForm" novalidate>
+        <div class="form-group">
+          <label for="fName">Tên món *</label>
+          <input type="text" id="fName" placeholder="VD: Phở bò">
+          <p class="error" id="errName"></p>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fCategory">Loại món *</label>
+            <select id="fCategory">
+              <option value="">-- Chọn --</option>
+              <option value="Món chính">Món chính</option>
+              <option value="Món phụ">Món phụ</option>
+              <option value="Tráng miệng">Tráng miệng</option>
+              <option value="Đồ uống">Đồ uống</option>
+            </select>
+            <p class="error" id="errCategory"></p>
+          </div>
+          <div class="form-group">
+            <label for="fLevel">Độ khó</label>
+            <select id="fLevel">
+              <option value="Dễ">Dễ</option>
+              <option value="Trung bình">Trung bình</option>
+              <option value="Khó">Khó</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fTime">Thời gian (phút) *</label>
+            <input type="number" id="fTime" min="1" placeholder="VD: 45">
+            <p class="error" id="errTime"></p>
+          </div>
+          <div class="form-group">
+            <label for="fServings">Số người ăn *</label>
+            <input type="number" id="fServings" min="1" placeholder="VD: 4">
+            <p class="error" id="errServings"></p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fIngredients">Nguyên liệu * <small>(mỗi dòng 1 nguyên liệu, số lượng ở đầu dòng)</small></label>
+          <textarea id="fIngredients" rows="4" placeholder="500 g thịt bò&#10;2 củ hành tây"></textarea>
+          <p class="error" id="errIngredients"></p>
+        </div>
+
+        <div class="form-group">
+          <label for="fSteps">Các bước làm * <small>(mỗi dòng 1 bước)</small></label>
+          <textarea id="fSteps" rows="4" placeholder="Rửa sạch thịt&#10;Ướp gia vị 15 phút"></textarea>
+          <p class="error" id="errSteps"></p>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-light" data-close>Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Xem chi tiết -->
+  <div id="detailModal" class="modal hidden">
+    <div class="modal-box">
+      <button class="modal-close" data-close>&times;</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Thông báo -->
+  <div id="toast" class="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
